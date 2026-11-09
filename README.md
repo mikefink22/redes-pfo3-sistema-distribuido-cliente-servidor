@@ -103,4 +103,35 @@ Cubren los resultados de las tareas, la validación de entradas, el reparto entr
 
 ## 5. Evidencias
 
-Capturas de la ejecución en [`docs/capturas/`](docs/capturas/): servidor con workers conectados, cliente enviando un lote, y la reasignación de tareas con `python demo.py --falla`.
+A continuación se documentan las capturas de ejecución que demuestran el funcionamiento de cada componente del sistema distribuido:
+
+### 5.1. Arranque y Registro de Workers
+El servidor escucha en sus dos puertos y acepta el registro por socket de múltiples workers anunciando el tamaño de su pool de hilos:
+
+![Arranque y Registro de Workers](docs/capturas/01-arranque-y-registro.png)
+
+### 5.2. Conexión y Menú Interactivo del Cliente
+El cliente se conecta al socket del servidor, consulta el estado de la topología distribuida (`estado`) y ejecuta comandos individuales y en lote:
+
+![Menú Interactivo del Cliente](docs/capturas/02-menu-cliente.png)
+
+### 5.3. Procesamiento en Paralelo y Multihilo
+Ejecución de un lote de tareas (`lote 6` y `lote 4`) donde se aprecia la distribución de carga y el trabajo concurrente en los hilos del pool:
+
+* **Cliente (recepción asíncrona de resultados y resumen):**
+  ![Cliente - Procesamiento en Paralelo](docs/capturas/03-cliente-procesamiento-en-paralelo.png)
+
+* **Servidor de Despacho (reparto al worker con menor carga relativa):**
+  ![Servidor - Procesamiento en Paralelo](docs/capturas/03-servidor-procesamiento-en-paralelo.png)
+
+* **Worker 1 (pool de hilos procesando en concurrencia):**
+  ![Worker 1 - Procesamiento en Paralelo](docs/capturas/03-worker-1-procesamiento-en-paralelo.png)
+
+* **Worker 2 (pool de hilos procesando en concurrencia):**
+  ![Worker 2 - Procesamiento en Paralelo](docs/capturas/03-worker-2-procesamiento-en-paralelo.png)
+
+### 5.4. Tolerancia a Fallos y Reasignación de Tareas
+Simulación de la caída abrupta de un nodo de procesamiento (`worker-2`) durante la ejecución de tareas. El servidor detecta la desconexión del socket, recupera las tareas huérfanas pendientes y las reasigna automáticamente a los workers supervivientes sin pérdida de resultados:
+
+![Tolerancia a Fallos y Reasignación](docs/capturas/03-tolerancia-a-fallos.png)
+
