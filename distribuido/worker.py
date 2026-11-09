@@ -2,6 +2,7 @@
 import argparse
 import logging
 import socket
+import threading
 from concurrent.futures import ThreadPoolExecutor
 
 from .comun import Conexion
@@ -30,6 +31,20 @@ class Worker:
             raise ConnectionError(f"el servidor rechazó el registro: {respuesta}")
         self.nombre = respuesta["nombre"]
         log.info("registrado como %s con %d hilos", self.nombre, self.hilos)
+        # La lectura del socket va en otro hilo: en Windows, Ctrl+C no interrumpe
+        # un recv() bloqueado, así que el hilo principal espera con timeout.
+        lector = threading.Thread(target=self._leer, daemon=True)
+        lector.start()
+        try:
+            while lector.is_alive():
+                lector.join(0.5)
+        except KeyboardInterrupt:
+            log.info("cerrando %s (Ctrl+C)", self.nombre)
+            self.detener()
+            lector.join(2)
+
+    def _leer(self):
+        """Recibe tareas y las manda al pool hasta que se cierra la conexión."""
         try:
             while True:
                 tarea = self.con.recibir()
