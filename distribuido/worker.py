@@ -3,6 +3,7 @@ import argparse
 import logging
 import socket
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
 
 from .comun import Conexion
@@ -59,12 +60,21 @@ class Worker:
             self.con.cerrar()
 
     def _procesar(self, tarea):
-        id_tarea = tarea.get("id") if isinstance(tarea, dict) else None
+        if not isinstance(tarea, dict):
+            tarea = {}
+        id_tarea = tarea.get("id")
+        hilo = threading.current_thread().name  # ej: worker-1_0 (hilo 0 del pool)
+        datos = repr(tarea.get("datos"))
+        datos = datos if len(datos) <= 30 else datos[:27] + "..."
+        log.info("[%s] tarea %s: %s(%s) ...", hilo, id_tarea, tarea.get("tipo"), datos)
+        inicio = time.perf_counter()
         try:
             resultado = ejecutar(tarea.get("tipo"), tarea.get("datos"))
             respuesta = {"id": id_tarea, "ok": True, "resultado": resultado}
+            log.info("[%s] tarea %s lista en %.2f s", hilo, id_tarea, time.perf_counter() - inicio)
         except Exception as error:  # un error de la tarea no debe tumbar al worker
             respuesta = {"id": id_tarea, "ok": False, "error": str(error)}
+            log.warning("[%s] tarea %s falló: %s", hilo, id_tarea, error)
         try:
             self.con.enviar(respuesta)
         except OSError:
