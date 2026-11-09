@@ -57,12 +57,7 @@ Tareas disponibles: `fibonacci`, `es_primo`, `invertir_texto`, `dormir` (simula 
 
 ## 3. Cómo ejecutarlo
 
-Requiere Python 3.9 o superior. No hay que instalar nada.
-
-```bash
-git clone https://github.com/mikefink22/pfo3-sistema-distribuido.git
-cd pfo3-sistema-distribuido
-```
+Requiere Python 3.9 o superior. No hay que instalar nada. Todos los comandos se ejecutan desde la raíz del repositorio.
 
 **Opción rápida (todo en un comando, ideal para las capturas):**
 
